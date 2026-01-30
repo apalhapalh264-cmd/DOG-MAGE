@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dogmage Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; color: white; }
+        .loading-dot { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+    <div id="status" class="text-center">
+        <p class="loading-dot text-xs tracking-[0.3em] text-gray-500 uppercase">Mencari Foto...</p>
+    </div>
+
+    <img id="img-display" class="hidden max-w-full max-h-full object-contain" alt="">
+
+    <script>
+        // Ambil path terakhir dari URL
+        const fullPath = window.location.pathname;
+        const fileName = fullPath.split('/').filter(p => p).pop();
+        
+        const display = document.getElementById('img-display');
+        const statusText = document.getElementById('status');
+
+        // Jika tidak ada nama file (berarti di root), lempar ke index
+        if (!fileName || fileName === 'index.html' || fileName === 'viewer.html') {
+            window.location.href = '/index.html';
+        } else {
+            // Daftar format yang akan dicoba secara berurutan
+            const formats = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+            let step = 0;
+
+            function tryLoad() {
+                if (step >= formats.length) {
+                    statusText.innerHTML = "<p class='text-red-500 font-bold'>404: FOTO TIDAK DITEMUKAN</p><p class='text-gray-600 text-[10px] mt-2'>Pastikan file ada di folder /images/</p>";
+                    return;
+                }
+                
+                // Mencari file di folder /images/ yang ada di GitHub kamu
+                display.src = `/images/${fileName}.${formats[step]}`;
+            }
+
+            display.onload = () => {
+                statusText.classList.add('hidden');
+                display.classList.remove('hidden');
+                document.title = fileName + " — Dogmage";
+            };
+
+            display.onerror = () => {
+                console.log(`Gagal memuat format: ${formats[step]}`);
+                step++;
+                tryLoad();
+            };
+
+            tryLoad();
+        }
+    </script>
+</body>
+</html>
+
